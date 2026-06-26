@@ -23,7 +23,6 @@ httpx==0.28.0
 
 # Redis & caching
 redis==5.2.1
-fastapi-cache2[redis]==0.2.2
 
 # Rate limiting
 slowapi==0.1.9
