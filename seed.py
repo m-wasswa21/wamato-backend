@@ -11,9 +11,15 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
+import bcrypt as _bcrypt
+
 from app.core.config import settings
-from app.core.security import hash_password
 from app.models.user import User, UserRole
+
+
+def hash_password(password: str) -> str:
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
+
 from app.models.property import Property, PropertyStatus, PropertyType, ListingPackage, PropertyPhoto
 
 # ── Sample image URLs (Unsplash) ──────────────────────────────────────────────
