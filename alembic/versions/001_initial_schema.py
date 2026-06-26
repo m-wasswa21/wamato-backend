@@ -14,9 +14,20 @@ down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
+# Reference existing PG enum types by name — never attempt to CREATE TYPE
+_userrole        = postgresql.ENUM(name="userrole",        create_type=False)
+_propertystatus  = postgresql.ENUM(name="propertystatus",  create_type=False)
+_propertytype    = postgresql.ENUM(name="propertytype",    create_type=False)
+_listingpackage  = postgresql.ENUM(name="listingpackage",  create_type=False)
+_bookingstatus   = postgresql.ENUM(name="bookingstatus",   create_type=False)
+_paymentstatus   = postgresql.ENUM(name="paymentstatus",   create_type=False)
+_paymenttype     = postgresql.ENUM(name="paymenttype",     create_type=False)
+_paymentmethod   = postgresql.ENUM(name="paymentmethod",   create_type=False)
+_messagetype     = postgresql.ENUM(name="messagetype",     create_type=False)
+_notificationtype = postgresql.ENUM(name="notificationtype", create_type=False)
+
 
 def _create_enum(name: str, *values: str) -> None:
-    """Create a PostgreSQL enum type, silently skip if it already exists."""
     vals = ", ".join(f"'{v}'" for v in values)
     op.execute(f"""
         DO $$ BEGIN
@@ -45,7 +56,7 @@ def upgrade() -> None:
         sa.Column("phone", sa.String(20)),
         sa.Column("whatsapp", sa.String(20)),
         sa.Column("hashed_password", sa.String(255), nullable=False),
-        sa.Column("role", sa.Enum("user", "agent", "admin", name="userrole", create_type=False), nullable=False, server_default="user"),
+        sa.Column("role", _userrole, nullable=False, server_default="user"),
         sa.Column("avatar_url", sa.String(512)),
         sa.Column("bio", sa.Text),
         sa.Column("district", sa.String(100)),
@@ -61,8 +72,8 @@ def upgrade() -> None:
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("owner_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
         sa.Column("title", sa.String(255), nullable=False),
-        sa.Column("type", sa.Enum("house","apartment","office","land","warehouse","commercial","short_stay","holiday_apt", name="propertytype", create_type=False), nullable=False),
-        sa.Column("status", sa.Enum("for_rent","for_sale","for_lease", name="propertystatus", create_type=False), nullable=False),
+        sa.Column("type", _propertytype, nullable=False),
+        sa.Column("status", _propertystatus, nullable=False),
         sa.Column("price", sa.Numeric(15, 2), nullable=False),
         sa.Column("district", sa.String(100), nullable=False),
         sa.Column("area", sa.String(100), nullable=False),
@@ -93,7 +104,7 @@ def upgrade() -> None:
         sa.Column("rating", sa.Float, server_default="0"),
         sa.Column("review_count", sa.Integer, server_default="0"),
         sa.Column("view_count", sa.Integer, server_default="0"),
-        sa.Column("listing_package", sa.Enum("basic","premium","featured", name="listingpackage", create_type=False), server_default="basic"),
+        sa.Column("listing_package", _listingpackage, server_default="basic"),
         sa.Column("is_verified", sa.Boolean, server_default="false"),
         sa.Column("is_active", sa.Boolean, server_default="true"),
         sa.Column("is_featured", sa.Boolean, server_default="false"),
@@ -142,7 +153,7 @@ def upgrade() -> None:
         sa.Column("nights", sa.Integer, nullable=False),
         sa.Column("cleaning_fee", sa.Numeric(10, 2), server_default="0"),
         sa.Column("total_amount", sa.Numeric(14, 2), nullable=False),
-        sa.Column("status", sa.Enum("pending","confirmed","cancelled","completed","no_show", name="bookingstatus", create_type=False), server_default="pending"),
+        sa.Column("status", _bookingstatus, server_default="pending"),
         sa.Column("special_requests", sa.Text),
         sa.Column("cancellation_reason", sa.String(500)),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
@@ -180,7 +191,7 @@ def upgrade() -> None:
         sa.Column("conversation_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False),
         sa.Column("sender_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
         sa.Column("content", sa.Text, nullable=False),
-        sa.Column("message_type", sa.Enum("text","image","system", name="messagetype", create_type=False), server_default="text"),
+        sa.Column("message_type", _messagetype, server_default="text"),
         sa.Column("is_read", sa.Boolean, server_default="false"),
         sa.Column("attachment_url", sa.String(512)),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
@@ -191,11 +202,7 @@ def upgrade() -> None:
     op.create_table("notifications",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("type", sa.Enum(
-            "booking_request","booking_confirmed","booking_cancelled","new_message",
-            "new_review","property_unlocked","payment_success","system",
-            name="notificationtype", create_type=False
-        ), nullable=False),
+        sa.Column("type", _notificationtype, nullable=False),
         sa.Column("title", sa.String(255), nullable=False),
         sa.Column("body", sa.Text, nullable=False),
         sa.Column("is_read", sa.Boolean, server_default="false"),
@@ -210,11 +217,11 @@ def upgrade() -> None:
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
         sa.Column("booking_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("bookings.id", ondelete="SET NULL")),
-        sa.Column("type", sa.Enum("booking","listing_package","unlock_property","unlock_pack", name="paymenttype", create_type=False), nullable=False),
-        sa.Column("method", sa.Enum("mtn_momo","airtel_money","card", name="paymentmethod", create_type=False), nullable=False),
+        sa.Column("type", _paymenttype, nullable=False),
+        sa.Column("method", _paymentmethod, nullable=False),
         sa.Column("amount", sa.Numeric(14, 2), nullable=False),
         sa.Column("currency", sa.String(5), server_default="UGX"),
-        sa.Column("status", sa.Enum("pending","processing","success","failed","refunded", name="paymentstatus", create_type=False), server_default="pending"),
+        sa.Column("status", _paymentstatus, server_default="pending"),
         sa.Column("provider_ref", sa.String(255)),
         sa.Column("phone_number", sa.String(20)),
         sa.Column("description", sa.String(500)),
@@ -226,9 +233,11 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    for tbl in ["payments","notifications","messages","conversations","reviews","bookings",
-                "unlock_credits","saved_properties","property_photos","properties","users"]:
+    for tbl in ["payments", "notifications", "messages", "conversations", "reviews",
+                "bookings", "unlock_credits", "saved_properties", "property_photos",
+                "properties", "users"]:
         op.drop_table(tbl)
-    for name in ["userrole","propertystatus","propertytype","listingpackage","bookingstatus",
-                 "paymentstatus","paymenttype","paymentmethod","messagetype","notificationtype"]:
+    for name in ["userrole", "propertystatus", "propertytype", "listingpackage",
+                 "bookingstatus", "paymentstatus", "paymenttype", "paymentmethod",
+                 "messagetype", "notificationtype"]:
         op.execute(f"DROP TYPE IF EXISTS {name}")
