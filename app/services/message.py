@@ -2,6 +2,7 @@ import uuid
 import math
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
+from sqlalchemy.orm import selectinload
 
 from app.models.message import Conversation, Message
 from app.schemas.message import ConversationCreate, MessageCreate, MessageOut
@@ -47,11 +48,17 @@ class MessageService:
     @staticmethod
     async def get_user_conversations(db: AsyncSession, user_id: uuid.UUID) -> list:
         res = await db.execute(
-            select(Conversation).where(
-                or_(Conversation.participant_a == user_id, Conversation.participant_b == user_id)
-            ).order_by(Conversation.updated_at.desc())
+            select(Conversation)
+            .where(or_(Conversation.participant_a == user_id, Conversation.participant_b == user_id))
+            .options(selectinload(Conversation.user_a), selectinload(Conversation.user_b))
+            .order_by(Conversation.updated_at.desc())
         )
-        return res.scalars().all()
+        convs = res.scalars().all()
+        # Attach participant names for the client
+        for c in convs:
+            c.participant_a_name = c.user_a.full_name if c.user_a else None
+            c.participant_b_name = c.user_b.full_name if c.user_b else None
+        return convs
 
     @staticmethod
     async def get_messages(

@@ -52,7 +52,14 @@ async def my_conversations(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    return await MessageService.get_user_conversations(db, current_user.id)
+    convs = await MessageService.get_user_conversations(db, current_user.id)
+    result = []
+    for c in convs:
+        d = ConversationOut.model_validate(c)
+        d.participant_a_name = getattr(c, "participant_a_name", None)
+        d.participant_b_name = getattr(c, "participant_b_name", None)
+        result.append(d)
+    return result
 
 
 @router.get("/conversations/{conv_id}/messages", response_model=Paginated[MessageOut])

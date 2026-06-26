@@ -37,5 +37,7 @@ class ConversationOut(BaseModel):
     property_id: Optional[uuid.UUID]
     participant_a: uuid.UUID
     participant_b: uuid.UUID
+    participant_a_name: Optional[str] = None
+    participant_b_name: Optional[str] = None
     last_message_preview: Optional[str]
     updated_at: datetime
