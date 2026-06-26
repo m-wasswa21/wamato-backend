@@ -1,6 +1,6 @@
+import json
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import AnyHttpUrl, field_validator
 
 
 class Settings(BaseSettings):
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     # Server
     HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    PORT: int = 8002
     WORKERS: int = 4
 
     # Database
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
-    CACHE_TTL: int = 300  # seconds
+    CACHE_TTL: int = 300
 
     # JWT
     SECRET_KEY: str = "change-me-in-production-use-openssl-rand-hex-32"
@@ -32,15 +32,17 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
-    # CORS
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    # CORS — stored as plain string, parsed at runtime to support both formats:
+    # comma-separated: "https://a.com,https://b.com"
+    # JSON array:      '["https://a.com","https://b.com"]'
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:8080"
 
-    @field_validator("ALLOWED_ORIGINS", mode="before")
-    @classmethod
-    def parse_origins(cls, v):
-        if isinstance(v, str):
-            return [i.strip() for i in v.split(",")]
-        return v
+    @property
+    def cors_origins(self) -> List[str]:
+        v = self.ALLOWED_ORIGINS.strip()
+        if v.startswith("["):
+            return json.loads(v)
+        return [i.strip() for i in v.split(",") if i.strip()]
 
     # File uploads
     UPLOAD_DIR: str = "uploads"
