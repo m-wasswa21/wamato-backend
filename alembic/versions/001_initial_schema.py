@@ -15,26 +15,28 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
-def upgrade() -> None:
-    # Enums
-    user_role = postgresql.ENUM("user", "agent", "admin", name="userrole")
-    property_status = postgresql.ENUM("for_rent", "for_sale", "for_lease", name="propertystatus")
-    property_type = postgresql.ENUM("house", "apartment", "office", "land", "warehouse", "commercial", "short_stay", "holiday_apt", name="propertytype")
-    listing_package = postgresql.ENUM("basic", "premium", "featured", name="listingpackage")
-    booking_status = postgresql.ENUM("pending", "confirmed", "cancelled", "completed", "no_show", name="bookingstatus")
-    payment_status = postgresql.ENUM("pending", "processing", "success", "failed", "refunded", name="paymentstatus")
-    payment_type = postgresql.ENUM("booking", "listing_package", "unlock_property", "unlock_pack", name="paymenttype")
-    payment_method = postgresql.ENUM("mtn_momo", "airtel_money", "card", name="paymentmethod")
-    message_type = postgresql.ENUM("text", "image", "system", name="messagetype")
-    notification_type = postgresql.ENUM(
-        "booking_request", "booking_confirmed", "booking_cancelled", "new_message",
-        "new_review", "property_unlocked", "payment_success", "system",
-        name="notificationtype"
-    )
+def _create_enum(name: str, *values: str) -> None:
+    """Create a PostgreSQL enum type, silently skip if it already exists."""
+    vals = ", ".join(f"'{v}'" for v in values)
+    op.execute(f"""
+        DO $$ BEGIN
+            CREATE TYPE {name} AS ENUM ({vals});
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$;
+    """)
 
-    for enum in [user_role, property_status, property_type, listing_package, booking_status,
-                 payment_status, payment_type, payment_method, message_type, notification_type]:
-        enum.create(op.get_bind(), checkfirst=True)
+
+def upgrade() -> None:
+    _create_enum("userrole", "user", "agent", "admin")
+    _create_enum("propertystatus", "for_rent", "for_sale", "for_lease")
+    _create_enum("propertytype", "house", "apartment", "office", "land", "warehouse", "commercial", "short_stay", "holiday_apt")
+    _create_enum("listingpackage", "basic", "premium", "featured")
+    _create_enum("bookingstatus", "pending", "confirmed", "cancelled", "completed", "no_show")
+    _create_enum("paymentstatus", "pending", "processing", "success", "failed", "refunded")
+    _create_enum("paymenttype", "booking", "listing_package", "unlock_property", "unlock_pack")
+    _create_enum("paymentmethod", "mtn_momo", "airtel_money", "card")
+    _create_enum("messagetype", "text", "image", "system")
+    _create_enum("notificationtype", "booking_request", "booking_confirmed", "booking_cancelled", "new_message", "new_review", "property_unlocked", "payment_success", "system")
 
     op.create_table("users",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
