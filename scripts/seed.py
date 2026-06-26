@@ -40,9 +40,10 @@ OFFICE_PHOTOS = [
     "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&q=80",
     "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=800&q=80",
 ]
-SHOP_PHOTOS = [
+COMMERCIAL_PHOTOS = [
     "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80",
     "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&q=80",
+    "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=800&q=80",
 ]
 SHORTSTAY_PHOTOS = [
     "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&q=80",
@@ -61,7 +62,8 @@ def _photos_for(prop_type):
         PropertyType.apartment: APARTMENT_PHOTOS,
         PropertyType.land: LAND_PHOTOS,
         PropertyType.office: OFFICE_PHOTOS,
-        PropertyType.shop: SHOP_PHOTOS,
+        PropertyType.commercial: COMMERCIAL_PHOTOS,
+        PropertyType.warehouse: COMMERCIAL_PHOTOS,
         PropertyType.short_stay: SHORTSTAY_PHOTOS,
         PropertyType.holiday_apt: HOLIDAY_PHOTOS,
     }.get(prop_type, HOUSE_PHOTOS)
@@ -79,7 +81,7 @@ SEED_PROPERTIES = [
     dict(title="Luxury Penthouse – Naguru", type=PropertyType.apartment, status=PropertyStatus.for_rent, price=4500000, district="Kampala", area="Naguru", description="Top-floor penthouse with rooftop terrace and city skyline views.", bedrooms=3, bathrooms=3, floor_size=220, is_verified=True, listing_package=ListingPackage.premium, has_security=True, has_internet=True, has_furnishing=True, latitude=0.3310, longitude=32.5990),
     dict(title="Studio – Makerere Hill", type=PropertyType.apartment, status=PropertyStatus.for_rent, price=450000, district="Kampala", area="Makerere", description="Affordable self-contained studio, walking distance to Makerere University.", bedrooms=1, bathrooms=1, floor_size=28, listing_package=ListingPackage.basic, has_internet=True, latitude=0.3340, longitude=32.5700),
     dict(title="100x100 Mailo Land – Entebbe Rd", type=PropertyType.land, status=PropertyStatus.for_sale, price=220000000, district="Wakiso", area="Entebbe Road", description="Corner plot with road frontage, ideal for commercial development.", plot_size=10000, is_verified=True, listing_package=ListingPackage.featured, latitude=0.2800, longitude=32.5500),
-    dict(title="Shop Space – Kikuubo", type=PropertyType.shop, status=PropertyStatus.for_lease, price=800000, district="Kampala", area="Kikuubo", description="Prime ground-floor retail space in Uganda's busiest trading hub.", floor_size=40, is_verified=True, listing_package=ListingPackage.basic, latitude=0.3139, longitude=32.5800),
+    dict(title="Shop Space – Kikuubo", type=PropertyType.commercial, status=PropertyStatus.for_lease, price=800000, district="Kampala", area="Kikuubo", description="Prime ground-floor retail space in Uganda's busiest trading hub.", floor_size=40, is_verified=True, listing_package=ListingPackage.basic, latitude=0.3139, longitude=32.5800),
     dict(title="Luxury Airbnb – Kololo Hill", type=PropertyType.short_stay, status=PropertyStatus.for_rent, price=180000, district="Kampala", area="Kololo", description="Premium Airbnb with infinity pool, fully staffed, city views.", bedrooms=3, bathrooms=3, floor_size=200, is_verified=True, listing_package=ListingPackage.featured, has_furnishing=True, has_internet=True, has_security=True, has_swimming_pool=True, latitude=0.3255, longitude=32.5835, is_short_stay=True, price_per_night=180000, max_guests=6, min_nights=1, cleaning_fee=50000, rating=4.8, review_count=112),
     dict(title="Modern Airbnb Studio – Ntinda", type=PropertyType.short_stay, status=PropertyStatus.for_rent, price=65000, district="Kampala", area="Ntinda", description="Minimalist studio with fast WiFi, perfect for business travellers.", bedrooms=1, bathrooms=1, floor_size=38, is_verified=True, listing_package=ListingPackage.basic, has_furnishing=True, has_internet=True, latitude=0.3395, longitude=32.6085, is_short_stay=True, price_per_night=65000, max_guests=2, min_nights=1, cleaning_fee=15000, rating=4.6, review_count=34),
     dict(title="Holiday Apartment – Munyonyo", type=PropertyType.holiday_apt, status=PropertyStatus.for_rent, price=280000, district="Kampala", area="Munyonyo", description="Lakeside holiday apartment with private beach access on Lake Victoria.", bedrooms=2, bathrooms=2, floor_size=95, is_verified=True, listing_package=ListingPackage.premium, has_furnishing=True, has_internet=True, latitude=0.2720, longitude=32.5980, is_short_stay=True, price_per_night=280000, max_guests=4, min_nights=2, cleaning_fee=40000, rating=4.9, review_count=67),
