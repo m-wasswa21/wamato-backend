@@ -14,11 +14,9 @@ COPY . .
 
 RUN mkdir -p uploads/properties uploads/avatars
 
-EXPOSE 8000
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
-CMD ["gunicorn", "app.main:app", \
-     "--worker-class", "uvicorn.workers.UvicornWorker", \
-     "--workers", "4", \
-     "--bind", "0.0.0.0:8000", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-"]
+EXPOSE 8002
+
+CMD ["./entrypoint.sh"]
