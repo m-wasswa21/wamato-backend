@@ -22,7 +22,7 @@ docker run -d \
   -e ALGORITHM="HS256" \
   -e ACCESS_TOKEN_EXPIRE_MINUTES="30" \
   -e REFRESH_TOKEN_EXPIRE_DAYS="30" \
-  -e ALLOWED_ORIGINS="https://wamatoestatesmanagementuganda.online,https://backend.wamatoestatesmanagementuganda.online" \
+  -e ALLOWED_ORIGINS='["https://wamatoestatesmanagementuganda.online","https://backend.wamatoestatesmanagementuganda.online"]' \
   -e UPLOAD_DIR="/app/uploads" \
   -e MAX_FILE_SIZE_MB="10" \
   -e MTN_MOMO_URL="https://sandbox.momodeveloper.mtn.com" \
