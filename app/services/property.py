@@ -136,14 +136,16 @@ class PropertyService:
     @staticmethod
     async def get_owner_listings(db: AsyncSession, owner_id: uuid.UUID, page: int, size: int) -> Paginated[PropertyCard]:
         total_res = await db.execute(
-            select(func.count()).select_from(Property).where(Property.owner_id == owner_id)
+            select(func.count()).select_from(Property).where(
+                Property.owner_id == owner_id, Property.is_active == True
+            )
         )
         total = total_res.scalar_one()
         offset = (page - 1) * size
         res = await db.execute(
             select(Property)
             .options(selectinload(Property.photos))
-            .where(Property.owner_id == owner_id)
+            .where(Property.owner_id == owner_id, Property.is_active == True)
             .order_by(Property.created_at.desc())
             .offset(offset).limit(size)
         )
@@ -166,6 +168,7 @@ class PropertyService:
         _assert_owner_or_admin(prop, current_user)
         prop.is_active = False
         db.add(prop)
+        await db.flush()
 
     @staticmethod
     async def add_photos(db: AsyncSession, property_id: uuid.UUID, files: List[UploadFile], current_user: User) -> Property:
